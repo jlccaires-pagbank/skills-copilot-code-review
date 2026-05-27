@@ -637,7 +637,7 @@ document.addEventListener("DOMContentLoaded", () => {
   manageAnnouncementsButton.addEventListener("click", openAnnouncementsModal);
   closeLoginModal.addEventListener("click", closeLoginModalHandler);
   closeAnnouncementsModal.addEventListener("click", closeAnnouncementsModalHandler);
-  announcementCancelEditButton.addEventListener("click", clearAnnouncementForm);
+  announcementCancelEditButton.addEventListener("click", () => clearAnnouncementForm());
 
   // Close login modal when clicking outside
   window.addEventListener("click", (event) => {
