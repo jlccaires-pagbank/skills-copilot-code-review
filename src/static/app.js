@@ -1274,10 +1274,11 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     try {
+      const wasEditingAnnouncement = Boolean(editingAnnouncementId);
       await saveAnnouncement(payload);
       clearAnnouncementForm(true);
       showAnnouncementFormFeedback(
-        editingAnnouncementId
+        wasEditingAnnouncement
           ? "Anúncio atualizado com sucesso."
           : "Anúncio publicado com sucesso.",
         "success"
