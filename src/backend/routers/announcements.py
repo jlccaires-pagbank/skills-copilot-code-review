@@ -4,10 +4,11 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel, Field
 
-from ..database import announcements_collection, teachers_collection
+from ..database import announcements_collection
+from .auth import get_teacher_from_session_token
 
 router = APIRouter(
     prefix="/announcements",
@@ -24,16 +25,12 @@ class AnnouncementPayload(BaseModel):
     expires_at: datetime
 
 
-def require_teacher(username: Optional[str]) -> Dict[str, Any]:
-    """Validate that a teacher username was provided and exists."""
-    if not username:
+def require_teacher(session_token: Optional[str]) -> Dict[str, Any]:
+    """Validate that a server-issued session token is present and valid."""
+    if not session_token:
         raise HTTPException(status_code=401, detail="Authentication required for this action")
 
-    teacher = teachers_collection.find_one({"_id": username})
-    if not teacher:
-        raise HTTPException(status_code=401, detail="Invalid teacher credentials")
-
-    return teacher
+    return get_teacher_from_session_token(session_token)
 
 
 def serialize_announcement(document: Dict[str, Any]) -> Dict[str, Any]:
@@ -77,9 +74,11 @@ def get_active_announcements() -> List[Dict[str, Any]]:
 
 
 @router.get("/manage", response_model=List[Dict[str, Any]])
-def get_manageable_announcements(teacher_username: Optional[str] = Query(None)) -> List[Dict[str, Any]]:
+def get_manageable_announcements(
+    session_token: Optional[str] = Header(None, alias="X-Session-Token")
+) -> List[Dict[str, Any]]:
     """Return all announcements for authenticated management screens."""
-    require_teacher(teacher_username)
+    require_teacher(session_token)
     documents = announcements_collection.find({}).sort([("expires_at", 1), ("created_at", -1)])
     return [serialize_announcement(document) for document in documents]
 
@@ -87,10 +86,10 @@ def get_manageable_announcements(teacher_username: Optional[str] = Query(None)) 
 @router.post("", response_model=Dict[str, Any])
 def create_announcement(
     payload: AnnouncementPayload,
-    teacher_username: Optional[str] = Query(None)
+    session_token: Optional[str] = Header(None, alias="X-Session-Token")
 ) -> Dict[str, Any]:
     """Create a new announcement."""
-    teacher = require_teacher(teacher_username)
+    teacher = require_teacher(session_token)
     validate_announcement_dates(payload)
 
     now = datetime.utcnow()
@@ -112,10 +111,10 @@ def create_announcement(
 def update_announcement(
     announcement_id: str,
     payload: AnnouncementPayload,
-    teacher_username: Optional[str] = Query(None)
+    session_token: Optional[str] = Header(None, alias="X-Session-Token")
 ) -> Dict[str, Any]:
     """Update an existing announcement."""
-    teacher = require_teacher(teacher_username)
+    teacher = require_teacher(session_token)
     validate_announcement_dates(payload)
 
     existing = announcements_collection.find_one({"_id": announcement_id})
@@ -139,10 +138,10 @@ def update_announcement(
 @router.delete("/{announcement_id}")
 def delete_announcement(
     announcement_id: str,
-    teacher_username: Optional[str] = Query(None)
+    session_token: Optional[str] = Header(None, alias="X-Session-Token")
 ) -> Dict[str, str]:
     """Delete an announcement."""
-    require_teacher(teacher_username)
+    require_teacher(session_token)
     result = announcements_collection.delete_one({"_id": announcement_id})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Announcement not found")

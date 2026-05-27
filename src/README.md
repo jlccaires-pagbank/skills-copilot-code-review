@@ -34,10 +34,10 @@ Uma aplicação FastAPI super simples que permite aos alunos visualizar e se ins
 | GET    | `/activities`                                                     | Obtém todas as atividades com detalhes e número atual de participantes |
 | POST   | `/activities/{activity_name}/signup?email=student@mergington.edu` | Inscreve-se em uma atividade                                         |
 | GET    | `/announcements`                                                  | Lista anúncios ativos para o banner público                          |
-| GET    | `/announcements/manage?teacher_username=principal`                | Lista todos os anúncios para gerenciamento autenticado               |
-| POST   | `/announcements?teacher_username=principal`                       | Cria um anúncio com título, mensagem, início opcional e expiração    |
-| PUT    | `/announcements/{announcement_id}?teacher_username=principal`     | Atualiza um anúncio existente                                        |
-| DELETE | `/announcements/{announcement_id}?teacher_username=principal`     | Exclui um anúncio existente                                          |
+| GET    | `/announcements/manage` + header `X-Session-Token`               | Lista todos os anúncios para gerenciamento autenticado               |
+| POST   | `/announcements` + header `X-Session-Token`                      | Cria um anúncio com título, mensagem, início opcional e expiração   |
+| PUT    | `/announcements/{announcement_id}` + header `X-Session-Token`    | Atualiza um anúncio existente                                        |
+| DELETE | `/announcements/{announcement_id}` + header `X-Session-Token`    | Exclui um anúncio existente                                          |
 
 ## Modelo de Dados
 

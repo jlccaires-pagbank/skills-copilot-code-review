@@ -339,18 +339,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function fetchManageableAnnouncements() {
-    if (!currentUser) {
+    if (!currentUser || !currentUser.session_token) {
       return;
     }
 
     announcementsManagerList.innerHTML = '<p class="loading-inline">Carregando anúncios...</p>';
 
     try {
-      const response = await fetch(
-        `/announcements/manage?teacher_username=${encodeURIComponent(
-          currentUser.username
-        )}`
-      );
+      const response = await fetch(`/announcements/manage`, {
+        headers: {
+          "X-Session-Token": currentUser.session_token,
+        },
+      });
 
       const data = await response.json();
 
@@ -389,12 +389,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function saveAnnouncement(payload) {
     const endpoint = editingAnnouncementId
-      ? `/announcements/${encodeURIComponent(
-          editingAnnouncementId
-        )}?teacher_username=${encodeURIComponent(currentUser.username)}`
-      : `/announcements?teacher_username=${encodeURIComponent(
-          currentUser.username
-        )}`;
+      ? `/announcements/${encodeURIComponent(editingAnnouncementId)}`
+      : `/announcements`;
 
     const method = editingAnnouncementId ? "PUT" : "POST";
 
@@ -402,6 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
       method,
       headers: {
         "Content-Type": "application/json",
+        "X-Session-Token": currentUser.session_token,
       },
       body: JSON.stringify(payload),
     });
@@ -416,19 +413,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function deleteAnnouncement(announcementId) {
-    if (!currentUser) {
+    if (!currentUser || !currentUser.session_token) {
       return;
     }
 
     try {
-      const response = await fetch(
-        `/announcements/${encodeURIComponent(
-          announcementId
-        )}?teacher_username=${encodeURIComponent(currentUser.username)}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const response = await fetch(`/announcements/${encodeURIComponent(announcementId)}`, {
+        method: "DELETE",
+        headers: {
+          "X-Session-Token": currentUser.session_token,
+        },
+      });
 
       const result = await response.json();
 
@@ -503,7 +498,7 @@ document.addEventListener("DOMContentLoaded", () => {
         currentUser = JSON.parse(savedUser);
         updateAuthUI();
         // Verify the stored user with the server
-        validateUserSession(currentUser.username);
+        validateUserSession(currentUser.session_token);
       } catch (error) {
         console.error("Error parsing saved user", error);
         logout(); // Clear invalid data
@@ -515,10 +510,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Validate user session with the server
-  async function validateUserSession(username) {
+  async function validateUserSession(sessionToken) {
+    if (!sessionToken) {
+      logout();
+      return;
+    }
+
     try {
       const response = await fetch(
-        `/auth/check-session?username=${encodeURIComponent(username)}`
+        `/auth/check-session?session_token=${encodeURIComponent(sessionToken)}`
       );
 
       if (!response.ok) {
