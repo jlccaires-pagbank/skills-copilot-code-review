@@ -6,19 +6,21 @@ Uma aplicação FastAPI super simples que permite aos alunos visualizar e se ins
 
 - Visualizar todas as atividades extracurriculares disponíveis
 - Inscrever-se em atividades
+- Exibir anúncios ativos carregados do banco de dados
+- Gerenciar anúncios autenticados com criação, edição e exclusão
 
 ## Como começar
 
 1. Instale as dependências:
 
    ```
-   pip install fastapi uvicorn
+   pip install -r requirements.txt
    ```
 
 2. Execute a aplicação:
 
    ```
-   python app.py
+   uvicorn src.app:app --reload
    ```
 
 3. Abra seu navegador e acesse:
@@ -31,6 +33,11 @@ Uma aplicação FastAPI super simples que permite aos alunos visualizar e se ins
 | ------ | ----------------------------------------------------------------- | -------------------------------------------------------------------- |
 | GET    | `/activities`                                                     | Obtém todas as atividades com detalhes e número atual de participantes |
 | POST   | `/activities/{activity_name}/signup?email=student@mergington.edu` | Inscreve-se em uma atividade                                         |
+| GET    | `/announcements`                                                  | Lista anúncios ativos para o banner público                          |
+| GET    | `/announcements/manage` + header `X-Session-Token`               | Lista todos os anúncios para gerenciamento autenticado               |
+| POST   | `/announcements` + header `X-Session-Token`                      | Cria um anúncio com título, mensagem, início opcional e expiração   |
+| PUT    | `/announcements/{announcement_id}` + header `X-Session-Token`    | Atualiza um anúncio existente                                        |
+| DELETE | `/announcements/{announcement_id}` + header `X-Session-Token`    | Exclui um anúncio existente                                          |
 
 ## Modelo de Dados
 
@@ -46,4 +53,4 @@ A aplicação usa um modelo de dados simples com identificadores significativos:
    - Nome
    - Série
 
-Todos os dados são armazenados em memória, o que significa que serão resetados quando o servidor for reiniciado.
+Todos os dados são armazenados no MongoDB local configurado em [src/backend/database.py](src/backend/database.py).

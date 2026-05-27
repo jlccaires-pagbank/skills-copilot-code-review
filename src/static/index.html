@@ -12,14 +12,38 @@
     />
   </head>
   <body>
-     <div class="announcement-banner">
-        📢 As inscrições para atividades estão abertas até o final do mês. Não perca sua vaga!
-    </div>
+    <section
+      id="announcement-region"
+      class="announcement-region hidden"
+      aria-label="Anuncios ativos"
+    >
+      <div class="announcement-shell">
+        <div class="announcement-region-head">
+          <span class="announcement-eyebrow">Comunicados da escola</span>
+          <p class="announcement-region-copy">
+            Avisos importantes publicados pela equipe administrativa.
+          </p>
+        </div>
+        <div id="announcement-banner" class="announcement-banner"></div>
+      </div>
+    </section>
     <header>
       <h1>Mergington High School</h1>
       <h2>Atividades Extracurriculares</h2>
       <div id="user-controls">
         <div id="user-status">
+          <button
+            id="manage-announcements-button"
+            class="icon-button muted-button"
+            type="button"
+            aria-label="Gerenciar anuncios"
+            aria-haspopup="dialog"
+            aria-controls="announcements-modal"
+            disabled
+          >
+            <span class="user-icon">📣</span>
+            <span>Anúncios</span>
+          </button>
           <button id="login-button" class="icon-button">
             <span class="user-icon">👤</span>
             <span>Entrar</span>
@@ -134,6 +158,97 @@
           <button type="submit">Entrar</button>
         </form>
         <div id="login-message" class="hidden message"></div>
+      </div>
+    </div>
+
+    <div
+      id="announcements-modal"
+      class="modal hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="announcements-modal-title"
+    >
+      <div class="modal-content announcements-modal-content">
+        <span class="close-announcements-modal">&times;</span>
+        <div class="announcements-modal-layout">
+          <section class="announcements-editor-panel">
+            <p class="modal-eyebrow">Painel administrativo</p>
+            <h3 id="announcements-modal-title">Gerenciar anúncios</h3>
+            <p class="announcements-panel-copy">
+              Crie avisos com período de publicação e mantenha o cabeçalho sempre atualizado.
+            </p>
+
+            <form id="announcement-form" class="announcement-form">
+              <div class="form-group">
+                <label for="announcement-title">Título</label>
+                <input
+                  type="text"
+                  id="announcement-title"
+                  maxlength="80"
+                  required
+                  placeholder="Ex.: Prazo final de inscrições"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="announcement-message">Mensagem</label>
+                <textarea
+                  id="announcement-message"
+                  rows="4"
+                  maxlength="280"
+                  required
+                  placeholder="Descreva o anúncio que será exibido no topo da página"
+                ></textarea>
+              </div>
+
+              <div class="announcement-form-grid">
+                <div class="form-group">
+                  <label for="announcement-start-date">Início opcional</label>
+                  <input type="datetime-local" id="announcement-start-date" />
+                </div>
+
+                <div class="form-group">
+                  <label for="announcement-expiration-date">Expira em</label>
+                  <input
+                    type="datetime-local"
+                    id="announcement-expiration-date"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="announcement-form-actions">
+                <button type="submit" id="announcement-submit-button">
+                  Publicar anúncio
+                </button>
+                <button
+                  type="button"
+                  id="announcement-cancel-edit"
+                  class="secondary-action hidden"
+                >
+                  Cancelar edição
+                </button>
+              </div>
+            </form>
+
+            <div id="announcement-form-message" class="hidden message"></div>
+          </section>
+
+          <section class="announcements-list-panel">
+            <div class="announcements-list-header">
+              <div>
+                <p class="modal-eyebrow">Biblioteca</p>
+                <h4>Anúncios existentes</h4>
+              </div>
+              <span id="announcements-count" class="announcement-count">0</span>
+            </div>
+            <div
+              id="announcements-manager-list"
+              class="announcements-manager-list"
+              aria-live="polite"
+            ></div>
+          </section>
+        </div>
       </div>
     </div>
 
